@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Money</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FDFCF9;--card:#fff;--text:#1E1C19;--muted:#8C8578;--border:#E8E2D8;--border2:#D4CEC4;--gold:#A67C00;--gold-bg:#FFF8E7;--teal:#0D7C72;--teal-bg:#E6F7F5;--green:#16803C;--green-bg:#E8F8EE;--red:#C42B2B;--red-bg:#FEF2F2;--purple:#6D28D9;--purple-bg:#F3EEFF;--blue:#1D5CBF;--blue-bg:#EFF6FF;--orange:#C2590A;--orange-bg:#FFF3E8;--dark:#1A1A1F;--dark2:#252530;--dark3:#32323E;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
+.header{position:sticky;top:0;z-index:50;background:rgba(253,252,249,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 32px}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.logo-text{font-size:18px;font-weight:700}.logo-sub{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-family:var(--mono)}
+.header-actions{display:flex;align-items:center;gap:10px}
+.sig-badge{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--mono)}
+.sig-lean{background:var(--green-bg);border:1.5px solid var(--green);color:var(--green)}
+.sig-prepare{background:var(--orange-bg);border:1.5px solid var(--orange);color:var(--orange)}
+.sig-stand{background:var(--red-bg);border:1.5px solid var(--red);color:var(--red)}
+.btn-save{padding:7px 16px;border-radius:7px;border:1.5px solid var(--gold);background:var(--gold-bg);color:var(--gold);font-size:12px;font-weight:600;font-family:var(--mono);cursor:pointer}
+.btn-save:hover{background:var(--gold);color:#fff}.btn-save.saved{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.main{padding:24px 32px 100px;max-width:1440px;margin:0 auto}
+.top-grid{display:grid;grid-template-columns:1fr 280px;gap:16px;margin-bottom:20px;align-items:start}
+.top-left{display:flex;flex-direction:column;gap:16px}
+.csv-card{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.csv-card.loaded{border-color:var(--green)}
+.csv-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.csv-info{flex:1;margin-left:14px}.csv-title{font-size:14px;font-weight:600}.csv-sub{font-size:12px;color:var(--muted)}
+.csv-actions{display:flex;gap:8px}
+.btn-csv{padding:8px 18px;border-radius:7px;border:none;font-size:12px;font-weight:600;font-family:var(--mono);cursor:pointer}
+.btn-csv-primary{background:var(--gold);color:#fff}.btn-csv-primary.loaded{background:var(--green)}
+.btn-csv-clear{background:var(--bg);border:1px solid var(--border);color:var(--muted)}
+.signal-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.sig-card{border-radius:10px;padding:14px 16px;border:1px solid transparent}
+.sig-card .label{font-size:9.5px;opacity:.7;font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.sig-card .value{font-size:22px;font-weight:700;font-family:var(--mono)}
+.sig-card .sub{font-size:10px;opacity:.6;margin-top:4px}
+.sig-card .bar{margin-top:6px;height:5px;border-radius:3px;overflow:hidden;background:rgba(0,0,0,.08)}
+.sig-card .bar-fill{height:100%;border-radius:3px}
+.pillars-panel{background:var(--dark);border-radius:14px;overflow:hidden;align-self:start}
+.pillar-item{padding:16px 20px;cursor:pointer;transition:background .15s;border-left:4px solid transparent}
+.pillar-item:not(:last-child){border-bottom:1px solid var(--dark3)}
+.pillar-item:hover,.pillar-item.active{background:var(--dark2)}
+.pillar-label{font-size:10px;font-family:var(--mono);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.pillar-value{font-size:20px;font-weight:700;color:#fff}
+.pillar-sub{font-size:10px;color:#999;margin-top:2px}
+.panel{margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
+.panel-title{font-size:15px;font-weight:600;margin-bottom:14px}
+.section{margin-bottom:28px}.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.section-title{font-size:18px;font-weight:700}
+.section-metrics{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.metric-box{background:var(--dark);border-radius:8px;padding:8px 14px}
+.metric-box .ml{font-size:9px;color:#aaa;font-family:var(--mono);letter-spacing:.3px}
+.metric-box .mv{font-size:15px;font-weight:700;font-family:var(--mono);color:#fff}
+.btn-add{padding:7px 16px;border-radius:7px;border:none;color:#fff;font-size:12px;font-weight:600;font-family:var(--mono);cursor:pointer}
+.btn-add:hover{opacity:.85}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:10px;text-align:right;font-size:9px;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;font-weight:600;border-bottom-width:2px;border-bottom-style:solid}
+thead th:first-child{text-align:left}
+tbody td{padding:10px;text-align:right;font-family:var(--mono);border-bottom:1px solid var(--border)}
+tbody td:first-child{text-align:left;font-family:var(--sans);font-weight:600}
+tbody tr:last-child td{border-bottom:none}
+.del-btn{border:none;background:none;color:var(--red);cursor:pointer;font-size:16px;opacity:.4}.del-btn:hover{opacity:1}
+.editable{cursor:pointer;border-bottom:1px dashed var(--border2);padding-bottom:1px}.editable:hover{border-bottom-color:var(--gold)}
+.edit-input{width:85px;padding:2px 6px;font-size:12px;font-family:var(--mono);border:1.5px solid var(--gold);border-radius:4px;background:var(--gold-bg);color:var(--text);outline:none}
+.edit-input.wide{width:140px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
+.chart-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.chart-sub{font-size:11px;color:var(--muted);margin-bottom:14px;font-family:var(--mono)}
+.cat-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+select.type-select{font-size:11px;font-family:var(--mono);border:1px solid var(--border);border-radius:4px;padding:2px 4px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="header"><div class="header-inner">
+  <div class="logo"><div class="logo-icon">$</div><div><div class="logo-text">My Money</div><div class="logo-sub">Household Financial Dashboard</div></div></div>
+  <div class="header-actions">
+    <span id="signal-badge" class="sig-badge sig-prepare">Prepare</span>
+    <button id="btn-save" class="btn-save" onclick="saveAll()">Save Session</button>
+  </div>
+</div></div>
+
+<main class="main">
+  <div class="top-grid">
+    <div class="top-left">
+      <div id="csv-card" class="csv-card">
+        <div class="csv-icon" id="csv-icon" style="background:var(--blue-bg);color:var(--blue)">&#8593;</div>
+        <div class="csv-info"><div class="csv-title" id="csv-title">Upload Bank CSV</div><div class="csv-sub" id="csv-sub">Import transactions to see expense breakdown. Supports most AU bank formats.</div></div>
+        <div class="csv-actions">
+          <button id="csv-clear" class="btn-csv btn-csv-clear" style="display:none" onclick="clearCSV()">Clear</button>
+          <button id="csv-btn" class="btn-csv btn-csv-primary" onclick="document.getElementById('csv-input').click()">Choose File</button>
+        </div>
+        <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="handleCSV(this)">
+      </div>
+      <div class="signal-row" id="signal-cards"></div>
+    </div>
+    <div class="pillars-panel" id="pillars-panel"></div>
+  </div>
+  <div id="chart-area"></div>
+  <div id="expanded-panel"></div>
+  <div id="property-section" class="section"></div>
+  <div id="shares-section" class="section"></div>
+  <div id="super-section" class="section"></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var COLORS=["#A67C00","#0D7C72","#6D28D9","#C2590A","#C42B2B","#1D5CBF","#16803C","#9F5CC0","#B45B1A","#2D8C84","#8B6914","#5B21B6"];
+var PCOL={income:"#16803C",expenses:"#C42B2B",savings:"#0D7C72",investments:"#A67C00",super:"#6D28D9"};
+var MONTH_COLORS=["#A67C00","#0D7C72","#6D28D9","#C2590A","#1D5CBF","#C42B2B","#16803C","#9F5CC0","#B45B1A","#2D8C84","#5B21B6","#8B6914"];
+
+var S={
+  properties:[
+    {id:1,name:"Family Home, Ivanhoe",type:"PPOR",value:1450000,mortgage:520000,rate:5.89,weeklyRent:0,occupancy:0,annualExpenses:12000,growth:4.2},
+    {id:2,name:"IP1 Brunswick",type:"Investment",value:780000,mortgage:480000,rate:6.19,weeklyRent:600,occupancy:95,annualExpenses:8400,growth:5.1},
+    {id:3,name:"IP2 Geelong",type:"Investment",value:620000,mortgage:390000,rate:6.39,weeklyRent:525,occupancy:92,annualExpenses:7200,growth:6.8}
+  ],
+  etfs:[
+    {id:1,ticker:"VAS",name:"Vanguard AU Shares",units:1200,avgPrice:82.5,currentPrice:94.2,allocation:35},
+    {id:2,ticker:"VGS",name:"Vanguard Intl Shares",units:800,avgPrice:95,currentPrice:112.8,allocation:28},
+    {id:3,ticker:"NDQ",name:"BetaShares NASDAQ 100",units:250,avgPrice:32,currentPrice:42.5,allocation:12},
+    {id:4,ticker:"VGE",name:"Vanguard Emerging Mkts",units:400,avgPrice:68,currentPrice:72.4,allocation:9},
+    {id:5,ticker:"VAF",name:"Vanguard AU Fixed Int",units:600,avgPrice:48.5,currentPrice:46.8,allocation:9},
+    {id:6,ticker:"VHY",name:"Vanguard High Yield",units:350,avgPrice:58,currentPrice:64.2,allocation:7}
+  ],
+  superMembers:[
+    {id:1,name:"Partner 1",fund:"SMSF",balance:285000,salaryIncSuper:185000,sgRate:11.5,salarySacrifice:12000,nonConcessional:0,insurance:1200},
+    {id:2,name:"Partner 2",fund:"SMSF",balance:195000,salaryIncSuper:145000,sgRate:11.5,salarySacrifice:8000,nonConcessional:0,insurance:950}
+  ],
+  income:[
+    {id:1,name:"Partner 1 Salary",type:"salary",grossAnnual:185000,netMonthly:11200},
+    {id:2,name:"Partner 2 Salary",type:"salary",grossAnnual:145000,netMonthly:9100},
+    {id:3,name:"IP1 Rent",type:"rental",grossAnnual:28800,netMonthly:2400},
+    {id:4,name:"IP2 Rent",type:"rental",grossAnnual:25200,netMonthly:2100},
+    {id:5,name:"ETF Dividends",type:"investment",grossAnnual:4800,netMonthly:400}
+  ],
+  savings:{emergencyCurrent:52000,offsetBalance:38000,cashReserve:7000},
+  txns:[],csvName:null,expandedPillar:null
+};
+
+var myChart=null;
+
+function fmt(v){return new Intl.NumberFormat("en-AU",{style:"currency",currency:"AUD",minimumFractionDigits:0,maximumFractionDigits:0}).format(v)}
+function fmtK(v){return v>=1e6?"$"+(v/1e6).toFixed(v>=1e7?1:2)+"M":v>=1e3?"$"+(v/1e3).toFixed(0)+"k":fmt(v)}
+function pF(v){return(v>0?"+":"")+v.toFixed(1)+"%"}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+// ── CSV PARSING (robust) ────────────────────────────────────────────────
+function parseCsvLine(line){
+  var result=[],current="",inQuotes=false;
+  for(var i=0;i<line.length;i++){
+    var ch=line[i];
+    if(inQuotes){if(ch==='"'){if(i+1<line.length&&line[i+1]==='"'){current+='"';i++}else inQuotes=false}else current+=ch}
+    else{if(ch==='"')inQuotes=true;else if(ch===","){result.push(current.trim());current=""}else current+=ch}
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function catTxn(d){
+  var l=d.toLowerCase();
+  if(/coles|woolworth|aldi|iga|grocer|fruit|veg/.test(l))return"Groceries";
+  if(/uber eat|menulog|doordash|mcdonald|cafe|coffee|restaurant|dining|pizza|sushi|bar |pub /.test(l))return"Dining Out";
+  if(/netflix|spotify|disney|apple\.com|google play|subscription|stan |binge|kayo/.test(l))return"Subscriptions";
+  if(/petrol|fuel|bp |shell |caltex|ampol|uber |lyft|taxi|parking|rego|toll|myki|ptv|train|bus/.test(l))return"Transport";
+  if(/electric|gas bill|water bill|internet|telstra|optus|vodafone|energy|agl|origin|nbn/.test(l))return"Utilities";
+  if(/medibank|bupa|nib |doctor|pharmacy|chemist|dental|physio|medical|health|hospital/.test(l))return"Healthcare";
+  if(/insurance|allianz|suncorp|qbe|racv|nrma|youi/.test(l))return"Insurance";
+  if(/school|tuition|childcare|kindy|daycare|education|university|tafe/.test(l))return"Education";
+  if(/mortgage|home loan|rent |body corp|strata|council rate/.test(l))return"Housing";
+  if(/target|kmart|bigw|jb hi|bunning|harvey|clothing|shoe|fashion|amazon/.test(l))return"Shopping";
+  if(/gym|sport|fitness|swim|ticket|cinema|concert|event/.test(l))return"Entertainment";
+  if(/transfer|pay |salary|wage|income|dividend|interest|xfer|trf/.test(l))return"Transfer/Income";
+  if(/atm|cash|withdraw/.test(l))return"Cash/ATM";
+  return"Other";
+}
+
+function parseDate(s){
+  if(!s)return null;
+  s=s.trim().replace(/"/g,"");
+  var parts=s.split(/[/\-\.]/);
+  if(parts.length!==3)return null;
+  var a=parseInt(parts[0],10),b=parseInt(parts[1],10),c=parseInt(parts[2],10);
+  if(isNaN(a)||isNaN(b)||isNaN(c))return null;
+  var year,month,day;
+  if(a>1000){year=a;month=b;day=c}
+  else if(c>1000){year=c;month=b;day=a}
+  else if(c<100){year=2000+c;month=b;day=a}
+  else{year=c;month=b;day=a}
+  if(month<1||month>12||day<1||day>31)return null;
+  return new Date(year,month-1,day);
+}
+
+function parseCSV(text){
+  var lines=text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").trim().split("\n");
+  if(lines.length<2)return[];
+  var headers=parseCsvLine(lines[0]).map(function(h){return h.toLowerCase().replace(/"/g,"").trim()});
+  
+  var dI=-1,descI=-1,amtI=-1,debI=-1,creI=-1,catI=-1;
+  for(var i=0;i<headers.length;i++){
+    var h=headers[i];
+    if(dI<0&&/date/.test(h))dI=i;
+    if(descI<0&&/desc|narr|memo|particular|detail|reference|payee/.test(h))descI=i;
+    if(amtI<0&&/^amount$/.test(h))amtI=i;
+    if(debI<0&&/debit|withdrawal/.test(h))debI=i;
+    if(creI<0&&/credit|deposit/.test(h))creI=i;
+    if(catI<0&&/^cat|^category|^type$/.test(h))catI=i;
+  }
+  if(descI<0)descI=Math.min(1,headers.length-1);
+
+  var txns=[],skipped=0;
+  for(var i=1;i<lines.length;i++){
+    if(!lines[i].trim())continue;
+    var vals=parseCsvLine(lines[i]);
+    if(vals.length<2){skipped++;continue}
+    
+    var desc=vals[descI]||"";
+    var amount=0;
+    if(amtI>=0&&vals[amtI]){
+      amount=parseFloat(vals[amtI].replace(/[^0-9.\-]/g,""))||0;
+    }else{
+      var deb=0,cre=0;
+      if(debI>=0&&vals[debI])deb=Math.abs(parseFloat(vals[debI].replace(/[^0-9.\-]/g,""))||0);
+      if(creI>=0&&vals[creI])cre=Math.abs(parseFloat(vals[creI].replace(/[^0-9.\-]/g,""))||0);
+      if(cre>0)amount=cre;else if(deb>0)amount=-deb;
+    }
+    if(amount===0){skipped++;continue}
+
+    var date=dI>=0?parseDate(vals[dI]):null;
+    var category=catI>=0&&vals[catI]?vals[catI].trim():catTxn(desc);
+    var isIncome=amount>0;
+    txns.push({date:date,description:desc,amount:amount,category:category,isIncome:isIncome});
+  }
+  return txns;
+}
+
+function handleCSV(input){
+  var f=input.files&&input.files[0];
+  if(!f)return;
+  document.getElementById("csv-title").textContent="Processing...";
+  document.getElementById("csv-sub").textContent="Parsing "+f.name+"...";
+  S.csvName=f.name;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var text=ev.target.result;
+    S.txns=parseCSV(text);
+    input.value="";
+    render();
+  };
+  reader.onerror=function(){
+    document.getElementById("csv-title").textContent="Error reading file";
+    document.getElementById("csv-sub").textContent="Please try again with a valid CSV file.";
+  };
+  reader.readAsText(f);
+}
+function clearCSV(){S.txns=[];S.csvName=null;try{localStorage.removeItem("mymoney-csv")}catch(e){}render()}
+
+// ── METRICS ─────────────────────────────────────────────────────────────
+function calc(){
+  var totalInc=S.income.reduce(function(a,i){return a+i.netMonthly},0);
+  var totalSav=S.savings.emergencyCurrent+S.savings.offsetBalance+S.savings.cashReserve;
+  var pEq=0,pVal=0,pDebt=0;
+  S.properties.forEach(function(p){pVal+=p.value;pDebt+=p.mortgage;pEq+=(p.value-p.mortgage)});
+  var eVal=0,eCost=0;
+  S.etfs.forEach(function(h){eVal+=h.units*h.currentPrice;eCost+=h.units*h.avgPrice});
+  var supTot=S.superMembers.reduce(function(a,m){return a+m.balance},0);
+
+  var expTxns=S.txns.filter(function(t){return!t.isIncome&&t.category!=="Transfer/Income"});
+  var totExp=0;expTxns.forEach(function(t){totExp+=Math.abs(t.amount)});
+  var moSet={};expTxns.forEach(function(t){if(t.date)moSet[t.date.getFullYear()+"-"+t.date.getMonth()]=1});
+  var months=Math.max(Object.keys(moSet).length,1);
+  var avgExp=totExp/months;
+  var hasCSV=S.txns.length>0;
+
+  // By category
+  var byCat={};expTxns.forEach(function(t){byCat[t.category]=(byCat[t.category]||0)+Math.abs(t.amount)});
+  var catList=[];for(var k in byCat)catList.push({name:k,total:byCat[k],monthly:byCat[k]/months});
+  catList.sort(function(a,b){return b.total-a.total});
+
+  // By month then by category (for clustered chart)
+  var byMoCat={};var monthLabels=[];var monthKeys=[];
+  expTxns.forEach(function(t){
+    if(!t.date)return;
+    var mk=t.date.getFullYear()+"-"+String(t.date.getMonth()+1).padStart(2,"0");
+    var ml=t.date.toLocaleDateString("en-AU",{month:"short",year:"2-digit"});
+    if(!byMoCat[mk]){byMoCat[mk]={label:ml,cats:{}};monthKeys.push(mk)}
+    byMoCat[mk].cats[t.category]=(byMoCat[mk].cats[t.category]||0)+Math.abs(t.amount);
+  });
+  monthKeys.sort();
+  var sortedMonths=monthKeys.map(function(k){return{key:k,label:byMoCat[k].label,cats:byMoCat[k].cats}});
+
+  var topCats=catList.slice(0,8).map(function(c){return c.name});
+
+  var exp=hasCSV?avgExp:14375;
+  var surplus=totalInc-exp;
+  var savRate=totalInc>0?(surplus/totalInc*100):0;
+  var eMo=S.savings.emergencyCurrent/exp;
+  var drift=3.2;
+  if(hasCSV&&sortedMonths.length>=2){
+    var last=0,prev=0;
+    for(var c in sortedMonths[sortedMonths.length-1].cats)last+=sortedMonths[sortedMonths.length-1].cats[c];
+    for(var c in sortedMonths[sortedMonths.length-2].cats)prev+=sortedMonths[sortedMonths.length-2].cats[c];
+    if(prev>0)drift=(last-prev)/prev*100;
+  }
+  var capReady=Math.min(100,Math.round((savRate>20?40:savRate*2)+(Math.abs(drift)<5?30:Math.abs(drift)<10?20:10)+(eMo>6?30:(eMo/6)*30)));
+  var signal=capReady>=70&&Math.abs(drift)<5&&savRate>15?"Lean In":capReady<40||Math.abs(drift)>20||savRate<5?"Stand Down":"Prepare";
+  var netWorth=pEq+eVal+totalSav+supTot;
+
+  return{totalInc:totalInc,exp:exp,surplus:surplus,savRate:savRate,drift:drift,pEq:pEq,pVal:pVal,pDebt:pDebt,eVal:eVal,eCost:eCost,supTot:supTot,totalSav:totalSav,eMo:eMo,capReady:capReady,signal:signal,netWorth:netWorth,hasCSV:hasCSV,catList:catList,sortedMonths:sortedMonths,topCats:topCats,txnCount:S.txns.length,avgExp:avgExp};
+}
+
+// ── EDITABLE ────────────────────────────────────────────────────────────
+function ed(val,kind,coll,id,field){
+  var display=kind==="money"?fmt(val):kind==="pct"?val+"%":kind==="number"?Number(val).toLocaleString():esc(String(val));
+  var cls=kind==="text"?"wide":"";
+  return '<span class="editable" onclick="startEdit(this,\''+coll+'\','+id+',\''+field+'\',\''+kind+'\')">'+display+'</span>';
+}
+window.startEdit=function(el,coll,id,field,kind){
+  var arr=S[coll];var item;for(var i=0;i<arr.length;i++)if(arr[i].id===id){item=arr[i];break}
+  if(!item)return;
+  var inp=document.createElement("input");
+  inp.className="edit-input"+(kind==="text"?" wide":"");
+  inp.value=item[field];
+  inp.style.textAlign=kind==="text"?"left":"right";
+  el.replaceWith(inp);inp.focus();inp.select();
+  function commit(){var v=kind==="money"||kind==="number"||kind==="pct"?parseFloat(inp.value)||0:inp.value;item[field]=v;render()}
+  inp.addEventListener("blur",commit);
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter")commit();if(e.key==="Escape")render()});
+};
+
+// ── SAVE/LOAD ───────────────────────────────────────────────────────────
+function saveAll(){
+  var btn=document.getElementById("btn-save");btn.textContent="Saving...";
+  try{
+    localStorage.setItem("mm-props",JSON.stringify(S.properties));
+    localStorage.setItem("mm-etfs",JSON.stringify(S.etfs));
+    localStorage.setItem("mm-super",JSON.stringify(S.superMembers));
+    if(S.txns.length>0)localStorage.setItem("mm-csv",JSON.stringify({name:S.csvName,txns:S.txns}));
+    else localStorage.removeItem("mm-csv");
+  }catch(e){}
+  btn.textContent="\u2713 Saved";btn.classList.add("saved");
+  setTimeout(function(){btn.textContent="Save Session";btn.classList.remove("saved")},2000);
+}
+function loadAll(){
+  try{
+    var p=localStorage.getItem("mm-props");if(p)S.properties=JSON.parse(p);
+    var e=localStorage.getItem("mm-etfs");if(e)S.etfs=JSON.parse(e);
+    var s=localStorage.getItem("mm-super");if(s)S.superMembers=JSON.parse(s);
+    var c=localStorage.getItem("mm-csv");
+    if(c){var d=JSON.parse(c);S.csvName=d.name;S.txns=d.txns.map(function(t){return{date:t.date?new Date(t.date):null,description:t.description,amount:t.amount,category:t.category,isIncome:t.isIncome}})}
+  }catch(e){}
+}
+
+// ── CRUD ─────────────────────────────────────────────────────────────────
+window.addProp=function(){S.properties.push({id:Date.now(),name:"New Property",type:"Investment",value:0,mortgage:0,rate:6.0,weeklyRent:0,occupancy:95,annualExpenses:0,growth:5});render()};
+window.delProp=function(id){S.properties=S.properties.filter(function(p){return p.id!==id});render()};
+window.addEtf=function(){S.etfs.push({id:Date.now(),ticker:"NEW",name:"New Holding",units:0,avgPrice:0,currentPrice:0,allocation:0});render()};
+window.delEtf=function(id){S.etfs=S.etfs.filter(function(e){return e.id!==id});render()};
+window.addSuper=function(){S.superMembers.push({id:Date.now(),name:"New Member",fund:"Industry",balance:0,salaryIncSuper:0,sgRate:11.5,salarySacrifice:0,nonConcessional:0,insurance:0});render()};
+window.delSuper=function(id){S.superMembers=S.superMembers.filter(function(s){return s.id!==id});render()};
+window.togglePillar=function(id){S.expandedPillar=S.expandedPillar===id?null:id;render()};
+window.setType=function(coll,id,val){for(var i=0;i<S[coll].length;i++)if(S[coll][i].id===id){S[coll][i].type=val;break}render()};
+window.setFund=function(id,val){for(var i=0;i<S.superMembers.length;i++)if(S.superMembers[i].id===id){S.superMembers[i].fund=val;break}render()};
+
+// ── RENDER ──────────────────────────────────────────────────────────────
+function render(){
+  var m=calc();
+
+  // Signal badge
+  var sb=document.getElementById("signal-badge");
+  sb.textContent=m.signal;sb.className="sig-badge "+(m.signal==="Lean In"?"sig-lean":m.signal==="Prepare"?"sig-prepare":"sig-stand");
+
+  // CSV card
+  var cc=document.getElementById("csv-card"),ci=document.getElementById("csv-icon"),ct=document.getElementById("csv-title"),cs=document.getElementById("csv-sub"),cb=document.getElementById("csv-btn"),ccl=document.getElementById("csv-clear");
+  if(m.hasCSV){cc.classList.add("loaded");ci.style.background="var(--green-bg)";ci.style.color="var(--green)";ci.innerHTML="&#10003;";ct.textContent="CSV Loaded";cs.textContent=esc(S.csvName)+" \u2022 "+m.txnCount.toLocaleString()+" transactions imported";cb.textContent="Replace CSV";cb.classList.add("loaded");ccl.style.display=""}
+  else{cc.classList.remove("loaded");ci.style.background="var(--blue-bg)";ci.style.color="var(--blue)";ci.innerHTML="&#8593;";ct.textContent="Upload Bank CSV";cs.textContent="Import transactions to see expense breakdown. Supports most AU bank formats.";cb.textContent="Choose File";cb.classList.remove("loaded");ccl.style.display="none"}
+
+  // Signal cards
+  var cards=[
+    {l:"Net Monthly Surplus",v:fmt(m.surplus),s:"Run-rate",c:m.surplus>=0?"var(--green)":"var(--red)",bg:m.surplus>=0?"var(--green-bg)":"var(--red-bg)"},
+    {l:"Expense Drift",v:pF(m.drift),s:m.hasCSV?"vs prior month":"estimated",c:Math.abs(m.drift)>5?"var(--red)":Math.abs(m.drift)>2?"var(--orange)":"var(--green)",bg:Math.abs(m.drift)>5?"var(--red-bg)":Math.abs(m.drift)>2?"var(--orange-bg)":"var(--green-bg)"},
+    {l:"Savings Rate",v:m.savRate.toFixed(1)+"%",s:m.savRate>20?"Strong":m.savRate>10?"Healthy":"Low",c:m.savRate>20?"var(--green)":m.savRate>10?"var(--orange)":"var(--red)",bg:m.savRate>20?"var(--green-bg)":m.savRate>10?"var(--orange-bg)":"var(--red-bg)"},
+    {l:"Capital Readiness",v:m.capReady,s:"/100 composite",c:"var(--teal)",bg:"var(--teal-bg)",bar:m.capReady},
+    {l:"Total Net Worth",v:fmtK(m.netWorth),s:"All pillars",c:"var(--gold)",bg:"var(--gold-bg)"}
+  ];
+  document.getElementById("signal-cards").innerHTML=cards.map(function(c){
+    return'<div class="sig-card" style="background:'+c.bg+';color:'+c.c+'"><div class="label">'+c.l+'</div><div class="value">'+c.v+'</div>'+(c.bar!==undefined?'<div class="bar"><div class="bar-fill" style="width:'+c.bar+'%;background:'+c.c+'"></div></div>':'')+'<div class="sub">'+c.s+'</div></div>';
+  }).join("");
+
+  // Pillars panel
+  var pillars=[
+    {id:"income",l:"Income",v:fmt(m.totalInc),s:"/month net",c:PCOL.income},
+    {id:"expenses",l:"Expenses",v:m.hasCSV?fmt(m.avgExp):"No CSV",s:m.hasCSV?m.txnCount+" transactions":"Upload above",c:PCOL.expenses,dim:!m.hasCSV},
+    {id:"savings",l:"Savings",v:fmtK(m.totalSav),s:m.eMo.toFixed(1)+" months cover",c:PCOL.savings},
+    {id:"investments",l:"Investments",v:fmtK(m.pEq+m.eVal),s:"Property + Shares",c:PCOL.investments},
+    {id:"super",l:"Super",v:fmtK(m.supTot),s:S.superMembers.length+" members",c:PCOL.super}
+  ];
+  document.getElementById("pillars-panel").innerHTML=pillars.map(function(p){
+    return'<div class="pillar-item'+(S.expandedPillar===p.id?" active":"")+'" style="border-left-color:'+p.c+'" onclick="togglePillar(\''+p.id+'\')"><div class="pillar-label" style="color:'+p.c+'">'+p.l+'</div><div class="pillar-value"'+(p.dim?' style="opacity:.4"':"")+'>'+p.v+'</div><div class="pillar-sub">'+p.s+'</div></div>';
+  }).join("");
+
+  // Expanded panel
+  var ep="";
+  if(S.expandedPillar==="income"){
+    ep='<div class="panel"><div class="panel-title">Income Breakdown</div>';
+    S.income.forEach(function(s){ep+='<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:500">'+esc(s.name)+'</div><div style="font-size:10px;color:var(--muted);font-family:var(--mono)">'+s.type+'</div></div><div style="text-align:right"><div style="font-weight:600;color:var(--green);font-family:var(--mono)">'+fmt(s.netMonthly)+'</div><div style="font-size:10px;color:var(--muted)">'+fmt(s.grossAnnual)+' p.a.</div></div></div>'});
+    ep+='<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:600"><span style="color:var(--gold)">Total monthly net</span><span style="font-size:16px;color:var(--green);font-family:var(--mono)">'+fmt(m.totalInc)+'</span></div></div>';
+  }else if(S.expandedPillar==="savings"){
+    ep='<div class="panel"><div class="panel-title">Savings and Reserves</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">';
+    [{l:"Emergency Fund",v:fmtK(S.savings.emergencyCurrent),s:m.eMo.toFixed(1)+" months",c:m.eMo>=6?"var(--green)":"var(--orange)"},{l:"Offset Account",v:fmtK(S.savings.offsetBalance),s:"Reducing PPOR interest",c:"var(--teal)"},{l:"Cash Reserve",v:fmtK(S.savings.cashReserve),s:"Deployable",c:"var(--gold)"}].forEach(function(x){
+      ep+='<div style="background:var(--bg);border-radius:8px;padding:10px 14px"><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">'+x.l+'</div><div style="font-size:16px;font-weight:700;color:'+x.c+';font-family:var(--mono)">'+x.v+'</div><div style="font-size:10px;color:var(--muted)">'+x.s+'</div></div>';
+    });
+    ep+='</div></div>';
+  }
+  document.getElementById("expanded-panel").innerHTML=ep;
+
+  // ── CHART (clustered columns: categories on X, months as clusters) ────
+  if(m.hasCSV&&m.sortedMonths.length>0&&m.topCats.length>0){
+    var categories=m.topCats;
+    var monthLabels=m.sortedMonths.map(function(mo){return mo.label});
+    
+    var datasets=m.sortedMonths.map(function(mo,mi){
+      return{
+        label:mo.label,
+        data:categories.map(function(cat){return Math.round(mo.cats[cat]||0)}),
+        backgroundColor:MONTH_COLORS[mi%MONTH_COLORS.length],
+        borderRadius:3
+      };
+    });
+
+    var chartHtml='<div class="chart-card"><div class="chart-title">Monthly Expenditure by Category</div><div class="chart-sub">'+m.sortedMonths.length+' months \u2022 '+m.txnCount+' transactions \u2022 Categories on X-axis, clustered by month</div>';
+    chartHtml+='<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">';
+    m.sortedMonths.forEach(function(mo,mi){
+      chartHtml+='<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted)"><span style="width:8px;height:8px;border-radius:2px;background:'+MONTH_COLORS[mi%MONTH_COLORS.length]+'"></span>'+esc(mo.label)+'</span>';
+    });
+    chartHtml+='</div>';
+    chartHtml+='<div style="position:relative;height:320px"><canvas id="exp-canvas"></canvas></div>';
+    chartHtml+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:16px">';
+    m.catList.slice(0,8).forEach(function(c,i){
+      chartHtml+='<div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:6px"><span style="font-size:11px">'+esc(c.name)+'</span><span style="font-size:11px;font-weight:600;font-family:var(--mono)">'+fmt(Math.round(c.monthly))+'/mo</span></div>';
+    });
+    chartHtml+='</div></div>';
+    
+    document.getElementById("chart-area").innerHTML=chartHtml;
+
+    if(myChart){myChart.destroy();myChart=null}
+    var ctx=document.getElementById("exp-canvas");
+    if(ctx){
+      myChart=new Chart(ctx,{
+        type:"bar",
+        data:{labels:categories,datasets:datasets},
+        options:{
+          responsive:true,maintainAspectRatio:false,
+          scales:{
+            x:{grid:{display:false},ticks:{font:{size:10,family:"DM Mono"},color:"#8C8578",maxRotation:45}},
+            y:{grid:{color:"#E8E2D8"},ticks:{font:{size:10},color:"#8C8578",callback:function(v){return"$"+(v/1000).toFixed(0)+"k"}}}
+          },
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+": "+fmt(ctx.parsed.y)}}}}
+        }
+      });
+    }
+  }else{
+    document.getElementById("chart-area").innerHTML="";
+    if(myChart){myChart.destroy();myChart=null}
+  }
+
+  // ── PROPERTY TABLE ────────────────────────────────────────────────────
+  var propCF=S.properties.reduce(function(s,p){var r=p.weeklyRent*52*(p.occupancy/100)/12,c=p.annualExpenses/12,i=p.mortgage*(p.rate/100)/12;return s+(p.type!=="PPOR"?r-c-i:-(c+i))},0);
+  var pt='<div class="section-header"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div class="section-title" style="color:var(--gold)">Property Portfolio</div><div class="section-metrics">';
+  [{l:"Total Value",v:fmtK(m.pVal)},{l:"Total Equity",v:fmtK(m.pEq)},{l:"Total Debt",v:fmtK(m.pDebt)},{l:"LVR",v:(m.pVal>0?(m.pDebt/m.pVal*100).toFixed(0):0)+"%"}].forEach(function(x){pt+='<div class="metric-box"><div class="ml">'+x.l+'</div><div class="mv">'+x.v+'</div></div>'});
+  pt+='</div></div><button class="btn-add" style="background:var(--gold)" onclick="addProp()">+ Add Property</button></div>';
+  pt+='<div class="table-wrap"><table><thead><tr>';
+  ["Property","Type","Value","Mortgage","Equity","LVR","Rate","Rent /wk","Occupancy","Annual Costs","Monthly CF","Growth",""].forEach(function(h,i){
+    pt+='<th style="color:var(--gold);border-bottom-color:rgba(166,124,0,.2);'+(i===0?"text-align:left":"")+'">'+h+'</th>';
+  });
+  pt+='</tr></thead><tbody>';
+  S.properties.forEach(function(p){
+    var eq=p.value-p.mortgage,lvr=p.value>0?(p.mortgage/p.value*100):0;
+    var moR=p.weeklyRent*52*(p.occupancy/100)/12,moI=p.mortgage*(p.rate/100)/12,moC=p.annualExpenses/12;
+    var cf=p.type!=="PPOR"?moR-moC-moI:-(moC+moI);
+    var lc=lvr>80?"var(--red)":lvr>60?"var(--orange)":"var(--green)";
+    var cc2=cf>=0?"var(--green)":"var(--red)";
+    pt+='<tr><td>'+ed(p.name,"text","properties",p.id,"name")+'</td>';
+    pt+='<td><select class="type-select" style="background:'+(p.type==="PPOR"?"var(--purple-bg)":"var(--teal-bg)")+';color:'+(p.type==="PPOR"?"var(--purple)":"var(--teal)")+'" onchange="setType(\'properties\','+p.id+',this.value)"><option value="PPOR"'+(p.type==="PPOR"?" selected":"")+'>PPOR</option><option value="Investment"'+(p.type==="Investment"?" selected":"")+'>Investment</option></select></td>';
+    pt+='<td>'+ed(p.value,"money","properties",p.id,"value")+'</td>';
+    pt+='<td style="color:var(--red)">'+ed(p.mortgage,"money","properties",p.id,"mortgage")+'</td>';
+    pt+='<td style="color:var(--teal);font-weight:600">'+fmtK(eq)+'</td>';
+    pt+='<td style="color:'+lc+'">'+lvr.toFixed(0)+'%</td>';
+    pt+='<td>'+ed(p.rate,"pct","properties",p.id,"rate")+'</td>';
+    pt+='<td>'+ed(p.weeklyRent,"money","properties",p.id,"weeklyRent")+'</td>';
+    pt+='<td>'+ed(p.occupancy,"pct","properties",p.id,"occupancy")+'</td>';
+    pt+='<td>'+ed(p.annualExpenses,"money","properties",p.id,"annualExpenses")+'</td>';
+    pt+='<td style="font-weight:600;color:'+cc2+'">'+(cf>=0?"+":"")+fmt(Math.round(cf))+'</td>';
+    pt+='<td style="color:var(--green)">'+ed(p.growth,"pct","properties",p.id,"growth")+'</td>';
+    pt+='<td><button class="del-btn" onclick="delProp('+p.id+')">&times;</button></td></tr>';
+  });
+  pt+='</tbody></table></div>';
+  document.getElementById("property-section").innerHTML=pt;
+
+  // ── SHARES TABLE ──────────────────────────────────────────────────────
+  var eR=m.eVal-m.eCost,eRP=m.eCost>0?(eR/m.eCost*100):0;
+  var st='<div class="section-header"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div class="section-title" style="color:var(--teal)">Shares Portfolio</div><div class="section-metrics">';
+  [{l:"Value",v:fmtK(m.eVal)},{l:"Return",v:(eR>=0?"+":"")+fmtK(eR)},{l:"Return %",v:(eRP>=0?"+":"")+eRP.toFixed(1)+"%"}].forEach(function(x){st+='<div class="metric-box"><div class="ml">'+x.l+'</div><div class="mv">'+x.v+'</div></div>'});
+  st+='</div></div><button class="btn-add" style="background:var(--teal)" onclick="addEtf()">+ Add Holding</button></div>';
+  st+='<div class="table-wrap"><table><thead><tr>';
+  ["Ticker","Name","Units","Avg Price","Current","Value","Return $","Return %","Allocation",""].forEach(function(h,i){
+    st+='<th style="color:var(--teal);border-bottom-color:rgba(13,124,114,.2);'+(i<2?"text-align:left":"")+'">'+h+'</th>';
+  });
+  st+='</tr></thead><tbody>';
+  S.etfs.forEach(function(h,idx){
+    var v=h.units*h.currentPrice,cost=h.units*h.avgPrice,ret=v-cost,rp=cost>0?(ret/cost*100):0;
+    st+='<tr><td style="font-weight:700"><span style="display:inline-block;width:6px;height:6px;border-radius:2px;background:'+COLORS[idx%COLORS.length]+';margin-right:6px;vertical-align:middle"></span>'+ed(h.ticker,"text","etfs",h.id,"ticker")+'</td>';
+    st+='<td style="color:var(--muted);text-align:left">'+ed(h.name,"text","etfs",h.id,"name")+'</td>';
+    st+='<td>'+ed(h.units,"number","etfs",h.id,"units")+'</td>';
+    st+='<td style="color:var(--muted)">$'+h.avgPrice.toFixed(2)+'</td>';
+    st+='<td>'+ed(h.currentPrice,"number","etfs",h.id,"currentPrice")+'</td>';
+    st+='<td style="font-weight:600">'+fmtK(v)+'</td>';
+    st+='<td style="color:'+(ret>=0?"var(--green)":"var(--red)")+'">'+(ret>=0?"+":"")+fmtK(ret)+'</td>';
+    st+='<td style="font-weight:600;color:'+(rp>=0?"var(--green)":"var(--red)")+'">'+(rp>=0?"+":"")+rp.toFixed(1)+'%</td>';
+    st+='<td>'+ed(h.allocation,"pct","etfs",h.id,"allocation")+'</td>';
+    st+='<td><button class="del-btn" onclick="delEtf('+h.id+')">&times;</button></td></tr>';
+  });
+  st+='</tbody></table></div>';
+  document.getElementById("shares-section").innerHTML=st;
+
+  // ── SUPER TABLE ───────────────────────────────────────────────────────
+  var su='<div class="section-header"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div class="section-title" style="color:var(--purple)">Superannuation</div><div class="section-metrics">';
+  [{l:"Total Balance",v:fmtK(m.supTot)},{l:"Members",v:String(S.superMembers.length)}].forEach(function(x){su+='<div class="metric-box"><div class="ml">'+x.l+'</div><div class="mv">'+x.v+'</div></div>'});
+  su+='</div></div><button class="btn-add" style="background:var(--purple)" onclick="addSuper()">+ Add Member</button></div>';
+  su+='<div class="table-wrap"><table><thead><tr>';
+  ["Member","Fund","Balance","Salary (inc. super)","SG Rate","Employer SG","Salary Sacrifice","Non-Concessional","Insurance","Total Contrib.",""].forEach(function(h,i){
+    su+='<th style="color:var(--purple);border-bottom-color:rgba(109,40,217,.2);'+(i<2?"text-align:left":"")+'">'+h+'</th>';
+  });
+  su+='</tr></thead><tbody>';
+  S.superMembers.forEach(function(s){
+    var sg=s.salaryIncSuper*(s.sgRate/100)/(1+s.sgRate/100),tc=sg+s.salarySacrifice+s.nonConcessional;
+    su+='<tr><td>'+ed(s.name,"text","superMembers",s.id,"name")+'</td>';
+    su+='<td style="text-align:left"><select class="type-select" style="background:var(--purple-bg);color:var(--purple)" onchange="setFund('+s.id+',this.value)"><option value="SMSF"'+(s.fund==="SMSF"?" selected":"")+'>SMSF</option><option value="Industry"'+(s.fund==="Industry"?" selected":"")+'>Industry</option><option value="Retail"'+(s.fund==="Retail"?" selected":"")+'>Retail</option></select></td>';
+    su+='<td style="font-weight:600;color:var(--purple)">'+ed(s.balance,"money","superMembers",s.id,"balance")+'</td>';
+    su+='<td>'+ed(s.salaryIncSuper,"money","superMembers",s.id,"salaryIncSuper")+'</td>';
+    su+='<td>'+ed(s.sgRate,"pct","superMembers",s.id,"sgRate")+'</td>';
+    su+='<td style="color:var(--green)">'+fmtK(Math.round(sg))+'/yr</td>';
+    su+='<td style="color:var(--teal)">'+ed(s.salarySacrifice,"money","superMembers",s.id,"salarySacrifice")+'</td>';
+    su+='<td>'+ed(s.nonConcessional,"money","superMembers",s.id,"nonConcessional")+'</td>';
+    su+='<td style="color:var(--red)">'+ed(s.insurance,"money","superMembers",s.id,"insurance")+'</td>';
+    su+='<td style="font-weight:600;color:var(--green)">'+fmtK(Math.round(tc))+'/yr</td>';
+    su+='<td><button class="del-btn" onclick="delSuper('+s.id+')">&times;</button></td></tr>';
+  });
+  su+='</tbody></table></div>';
+  document.getElementById("super-section").innerHTML=su;
+}
+
+loadAll();
+render();
+</script>
+</body>
+</html>
